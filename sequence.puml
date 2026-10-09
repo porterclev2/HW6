@@ -1,0 +1,65 @@
+@startuml sequence
+title School Facility Rental - Sequence
+
+skinparam sequenceMessageAlign center
+
+actor Renter
+participant Website
+participant "School Staff" as Staff
+participant "Payment Service" as Pay
+participant "Email Service" as Email
+
+Renter -> Website: submit request
+activate Website
+Website -> Website: check availability
+note right of Website: facility is available
+Website -> Website: create request
+Website --> Renter: request submitted
+Website -> Staff: send request for review
+deactivate Website
+
+activate Staff
+Staff -> Staff: review request
+
+alt approved
+  Staff --> Website: approved
+  deactivate Staff
+  activate Website
+  Website -> Pay: charge renter
+  activate Pay
+
+  alt payment succeeds
+    Pay --> Website: payment succeeded
+    deactivate Pay
+    Website -> Website: save booking
+    Website -> Email: send confirmation email
+    activate Email
+    Email -> Renter: confirmation email
+    deactivate Email
+    Website --> Renter: booking confirmed
+  else payment fails
+    activate Pay
+    Pay --> Website: payment failed
+    deactivate Pay
+    Website -> Website: record payment failure
+    Website -> Email: send payment failure email
+    activate Email
+    Email -> Renter: payment failure email
+    deactivate Email
+  end
+  deactivate Website
+
+else rejected
+  activate Staff
+  Staff --> Website: rejected
+  deactivate Staff
+  activate Website
+  Website -> Website: record rejection
+  Website -> Email: send rejection email
+  activate Email
+  Email -> Renter: rejection email
+  deactivate Email
+  deactivate Website
+end
+
+@enduml

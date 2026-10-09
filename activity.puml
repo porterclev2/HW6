@@ -1,0 +1,64 @@
+@startuml activity
+title School Facility Rental - Activity
+
+skinparam ActivityDiamondBackgroundColor #ddeeff
+
+|Renter|
+|Website|
+|School Staff|
+|Payment Service|
+
+|Renter|
+start
+:Choose facility, date,
+time, and event type;
+
+|Website|
+:Check availability;
+while (available?) is ([not available])
+  :Show not available;
+  |Renter|
+  if (try another date?) then ([no])
+    ->Renter stops;
+    stop
+  else ([yes])
+    :Choose another date;
+  endif
+  |Website|
+  :Check availability;
+endwhile ([available])
+
+|Renter|
+:Enter contact information;
+:Submit request;
+
+|Website|
+:Create request;
+:Send request for review;
+
+|School Staff|
+:Review request;
+if (decision?) then ([rejected])
+  |Website|
+  :Record rejection;
+  :Send rejection email;
+  ->Rejected;
+  stop
+else ([approved])
+  |Payment Service|
+  :Charge renter;
+  if (payment result?) then ([payment fails])
+    |Website|
+    :Record payment failure;
+      :Send payment failure email;
+    ->Payment failed;
+    stop
+  else ([payment succeeds])
+    |Website|
+    :Save booking;
+      :Send confirmation email;
+    ->Booking confirmed;
+    stop
+  endif
+endif
+@enduml
